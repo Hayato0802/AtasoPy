@@ -33,12 +33,12 @@ if direct_input:
 
     # データの読み込み
     if paste_data1:
-        df1 = pd.read_csv(StringIO(paste_data1))
+        df1 = pd.read_csv(StringIO(paste_data1), dtype=str)
     else:
         df1 = None
 
     if paste_data2:
-        df2 = pd.read_csv(StringIO(paste_data2))
+        df2 = pd.read_csv(StringIO(paste_data2), dtype=str)
     else:
         df2 = None
 
@@ -51,12 +51,12 @@ else:
 
     # ファイルの読み込み
     if uploaded_file1:
-        df1 = pd.read_csv(uploaded_file1)
+        df1 = pd.read_csv(uploaded_file1, dtype=str)
     else:
         df1 = None
 
     if uploaded_file2:
-        df2 = pd.read_csv(uploaded_file2)
+        df2 = pd.read_csv(uploaded_file2, dtype=str)
     else:
         df2 = None
 
@@ -69,7 +69,10 @@ if df1 is not None and df2 is not None:
     column2 = st.selectbox('ファイル2の比較に使用するカラム名を選択してください', columns2)
 
     if column1 and column2:
-        preview = st.checkbox('データのプレビュー')
+        st.divider()
+        # プレビュー件数を定義
+        MAX_PREVIEW = 20
+        preview = st.checkbox('データのプレビュー(最大' + str(MAX_PREVIEW) + '行)')
 
         # データ比較
         unique_data1 = df1[~df1[column1].isin(df2[column2])]
@@ -92,52 +95,51 @@ if df1 is not None and df2 is not None:
 
         # データのプレビュー
         if preview:
-            st.write('CSVファイル1のユニークなデータ')
-            st.markdown(f"<div class='dataframe-container'>{dataframe_to_html(unique_data1)}</div>", unsafe_allow_html=True)
-            st.write('CSVファイル2のユニークなデータ')
-            st.markdown(f"<div class='dataframe-container'>{dataframe_to_html(unique_data2)}</div>", unsafe_allow_html=True)
+            st.write('CSVファイル1のデータ')
+            st.markdown(f"<div class='dataframe-container'>{dataframe_to_html(df1)}</div>", unsafe_allow_html=True)
+            st.write('CSVファイル2のデータ')
+            st.markdown(f"<div class='dataframe-container'>{dataframe_to_html(df2)}</div>", unsafe_allow_html=True)
 
 
+        st.divider()
+        
         # CSVダウンロード
         @st.cache_data
-        def convert_df(df):
-            return df.to_csv(index=False).encode('utf-8')
+        def convert_df_bom(df):
+            return '\ufeff'.encode('utf-8') + df.to_csv(index=False).encode('utf-8')
 
-        csv1 = convert_df(unique_data1)
-        csv2 = convert_df(unique_data2)
-        mergeCsv1 = convert_df(merge_data1)
-        mergeCsv2 = convert_df(merge_data2)
+        csv1 = convert_df_bom(unique_data1)
+        csv2 = convert_df_bom(unique_data2)
+        mergeCsv1 = convert_df_bom(merge_data1)
+        mergeCsv2 = convert_df_bom(merge_data2)
 
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.download_button(
-                label='CSVファイル1のみに存在するデータをダウンロード',
-                data=csv1,
-                file_name='unique_data1.csv',
-                mime='text/csv',
-            )
+        # ダウンロードボタンを縦に並べる
+        st.download_button(
+            label='CSVファイル1のみに存在するデータをダウンロード',
+            data=csv1,
+            file_name='unique_data1.csv',
+            mime='text/csv',
+        )
 
-        with col2:
-            st.download_button(
-                label='CSVファイル2のみに存在するデータをダウンロード',
-                data=csv2,
-                file_name='unique_data2.csv',
-                mime='text/csv',
-            )
+        st.download_button(
+            label='CSVファイル2のみに存在するデータをダウンロード',
+            data=csv2,
+            file_name='unique_data2.csv',
+            mime='text/csv',
+        )
 
-        with col3:
-            st.download_button(
-                label='両CSVファイルに含まれるデータをファイル1のフォーマットでダウンロード',
-                data=mergeCsv1,
-                file_name='merge_data1.csv',
-                mime='text/csv',
-            )
-        with col4: 
-            st.download_button(
-                label='両CSVファイルに含まれるデータをファイル2のフォーマットでダウンロード',
-                data=mergeCsv2,
-                file_name='merge_data2.csv',
-                mime='text/csv',
-            )
+        st.download_button(
+            label='両CSVファイルに含まれるデータをファイル1のフォーマットでダウンロード',
+            data=mergeCsv1,
+            file_name='merge_data1.csv',
+            mime='text/csv',
+        )
+
+        st.download_button(
+            label='両CSVファイルに含まれるデータをファイル2のフォーマットでダウンロード',
+            data=mergeCsv2,
+            file_name='merge_data2.csv',
+            mime='text/csv',
+        )
 else:
     st.write('CSVファイルをアップロードするか、データをコピペしてください。')
