@@ -1,4 +1,4 @@
-**ローカルで使用する場合**
+# ローカルで使用する場合
 
 1.pythonをインストール
 
@@ -14,7 +14,7 @@ https://ikuoblog.com/streamlit-install-error/
 
 
 
-**オンラインで使用する場合**
+# オンラインで使用する場合
 
 https://compareweb-67zeahtpdcinnb2yqpdcne.streamlit.app/
 
