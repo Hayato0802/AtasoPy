@@ -4,11 +4,13 @@
 
 2.コマンドプロンプトにて[pip install streamlit]でstreamlitを入れる
 
-3.streamlitのパスを通す
+3.streamlitのパスを通す(管理者権限が必要)
 
 https://ikuoblog.com/streamlit-install-error/
 
-4.run streamlit main.pyする
+管理者権限がない場合は、streamlit.exeがあるフォルダにて、[.\streamlit]を行うことでパス無しで実行が可能
+
+4.streamlit run main.pyする
 
 
 
