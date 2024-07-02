@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Streamlit",
+            "type": "python",
+            "request": "launch",
+            "program": "C:\\Users\\HayatoNishida\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\streamlit.exe",
+            "args": ["run", "C:\\work\\D_github\\compareWeb\\compare.py"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
