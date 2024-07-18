@@ -2,6 +2,17 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 
+st.set_page_config(
+    page_title="AtasoPy", 
+    layout="wide", 
+    menu_items={
+         'About': """
+         ## CSVファイル比較ツール
+         ### -AtasoPy-
+         あっちにあってこっちにない、を探すツールです。
+         """
+     })
+
 # カスタムCSSを適用
 st.markdown(
     """
@@ -19,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title('CSVファイル比較ツール')
+st.title('CSVファイル比較ツール -AtasoPy-')
 
 # チェックボックスで入力方法を選択
 direct_input = st.checkbox('ファイルを使用せず、直接入力する')
@@ -65,8 +76,8 @@ if df1 is not None and df2 is not None:
     columns1 = df1.columns.tolist()
     columns2 = df2.columns.tolist()
 
-    column1 = st.selectbox('ファイル1の比較に使用するカラム名を選択してください', columns1)
-    column2 = st.selectbox('ファイル2の比較に使用するカラム名を選択してください', columns2)
+    column1 = st.selectbox('ファイル1：比較のキーとなるカラム名を選択してください', columns1)
+    column2 = st.selectbox('ファイル2：比較のキーとなるカラム名を選択してください', columns2)
 
     if column1 and column2:
         st.divider()
@@ -108,6 +119,7 @@ if df1 is not None and df2 is not None:
         def convert_df_bom(df):
             return '\ufeff'.encode('utf-8') + df.to_csv(index=False).encode('utf-8')
 
+        # Streamlitにプロットを表示
         csv1 = convert_df_bom(unique_data1)
         csv2 = convert_df_bom(unique_data2)
         mergeCsv1 = convert_df_bom(merge_data1)
@@ -141,5 +153,4 @@ if df1 is not None and df2 is not None:
             file_name='merge_data2.csv',
             mime='text/csv',
         )
-else:
-    st.write('CSVファイルをアップロードするか、データをコピペしてください。')
+
