@@ -8,11 +8,12 @@ from datetime import datetime
 current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 st.set_page_config(
-    page_title="CSV Compare TOOL", 
+    page_title="AtasoPy", 
     layout="wide", 
     menu_items={
          'About': """
          ## CSVファイル比較ツール
+         ### -AtasoPy-
          あっちにあってこっちにない、を探すツールです。
          """
      })
@@ -34,7 +35,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title('CSVファイル比較ツール')
+st.title('CSVファイル比較ツール -AtasoPy-')
 
 uploaded_file1 = None
 uploaded_file2 = None
