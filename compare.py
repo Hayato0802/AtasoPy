@@ -1,8 +1,28 @@
 import streamlit as st
 import os
+import re
 import pandas as pd
 from io import StringIO
 from datetime import datetime
+
+
+def parse_csv_error_detail(e):
+    """ParserErrorのメッセージから原因を日本語で説明する"""
+    msg = str(e)
+    match = re.search(r'Expected (\d+) fields in line (\d+), saw (\d+)', msg)
+    if match:
+        expected, line, saw = match.group(1), match.group(2), match.group(3)
+        return (
+            f"**{line}行目**でカラム数が一致しません（ヘッダー: {expected}列、{line}行目: {saw}列）\n\n"
+            f"**考えられる原因:**\n"
+            f"- データ内にカンマが含まれている（例: 住所や説明文にカンマがある）\n"
+            f"- ダブルクォートで囲まれていないフィールドがある\n"
+            f"- CSVの区切り文字がカンマではない（タブ区切りなど）\n\n"
+            f"**対処法:**\n"
+            f"- 該当行（{line}行目付近）のデータを確認してください\n"
+            f"- カンマを含むフィールドをダブルクォートで囲んでください"
+        )
+    return f"CSV読み込みエラー: {msg}"
 
 # 現在の日時を取得してフォーマット
 current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -52,12 +72,20 @@ if direct_input:
 
     # データの読み込み
     if paste_data1:
-        df1 = pd.read_csv(StringIO(paste_data1), dtype=str)
+        try:
+            df1 = pd.read_csv(StringIO(paste_data1), dtype=str)
+        except pd.errors.ParserError as e:
+            st.error(f'データ1の読み込みエラー\n\n{parse_csv_error_detail(e)}')
+            df1 = None
     else:
         df1 = None
 
     if paste_data2:
-        df2 = pd.read_csv(StringIO(paste_data2), dtype=str)
+        try:
+            df2 = pd.read_csv(StringIO(paste_data2), dtype=str)
+        except pd.errors.ParserError as e:
+            st.error(f'データ2の読み込みエラー\n\n{parse_csv_error_detail(e)}')
+            df2 = None
     else:
         df2 = None
 
@@ -70,12 +98,20 @@ else:
 
     # ファイルの読み込み
     if uploaded_file1:
-        df1 = pd.read_csv(uploaded_file1, dtype=str)
+        try:
+            df1 = pd.read_csv(uploaded_file1, dtype=str)
+        except pd.errors.ParserError as e:
+            st.error(f'ファイル1の読み込みエラー\n\n{parse_csv_error_detail(e)}')
+            df1 = None
     else:
         df1 = None
 
     if uploaded_file2:
-        df2 = pd.read_csv(uploaded_file2, dtype=str)
+        try:
+            df2 = pd.read_csv(uploaded_file2, dtype=str)
+        except pd.errors.ParserError as e:
+            st.error(f'ファイル2の読み込みエラー\n\n{parse_csv_error_detail(e)}')
+            df2 = None
     else:
         df2 = None
 

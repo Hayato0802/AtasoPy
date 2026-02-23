@@ -14,11 +14,8 @@ https://ikuoblog.com/streamlit-install-error/
 
 
 
-
-
 # オンラインで使用する場合
 
 https://compareweb-67zeahtpdcinnb2yqpdcne.streamlit.app/
 
 ※念のため、セキュリティに気を付けて使用してください
-
