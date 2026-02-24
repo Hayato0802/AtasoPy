@@ -1,11 +1,14 @@
 """AtasoPy Streamlit UIテスト（AppTest使用）"""
 import pytest
+from pathlib import Path
 from streamlit.testing.v1 import AppTest
+
+ROOT = str(Path(__file__).resolve().parent.parent)
 
 
 def create_app():
     """compare.pyのAppTestインスタンスを作成"""
-    return AppTest.from_file("compare.py", default_timeout=10)
+    return AppTest.from_file(f"{ROOT}/compare.py", default_timeout=10)
 
 
 class TestAppBasic:
