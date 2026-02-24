@@ -1,35 +1,14 @@
 import streamlit as st
 import os
-import re
-import pandas as pd
-from io import StringIO
 from datetime import datetime
-
-
-def parse_csv_error_detail(e):
-    """ParserErrorのメッセージから原因を日本語で説明する"""
-    msg = str(e)
-    match = re.search(r'Expected (\d+) fields in line (\d+), saw (\d+)', msg)
-    if match:
-        expected, line, saw = match.group(1), match.group(2), match.group(3)
-        return (
-            f"**{line}行目**でカラム数が一致しません（ヘッダー: {expected}列、{line}行目: {saw}列）\n\n"
-            f"**考えられる原因:**\n"
-            f"- データ内にカンマが含まれている（例: 住所や説明文にカンマがある）\n"
-            f"- ダブルクォートで囲まれていないフィールドがある\n"
-            f"- CSVの区切り文字がカンマではない（タブ区切りなど）\n\n"
-            f"**対処法:**\n"
-            f"- 該当行（{line}行目付近）のデータを確認してください\n"
-            f"- カンマを含むフィールドをダブルクォートで囲んでください"
-        )
-    return f"CSV読み込みエラー: {msg}"
+from compare_core import load_csv, compare_data, convert_df_bom
 
 # 現在の日時を取得してフォーマット
 current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 st.set_page_config(
-    page_title="AtasoPy", 
-    layout="wide", 
+    page_title="AtasoPy",
+    layout="wide",
     menu_items={
          'About': """
          ## CSVファイル比較ツール
@@ -72,20 +51,16 @@ if direct_input:
 
     # データの読み込み
     if paste_data1:
-        try:
-            df1 = pd.read_csv(StringIO(paste_data1), dtype=str)
-        except pd.errors.ParserError as e:
-            st.error(f'データ1の読み込みエラー\n\n{parse_csv_error_detail(e)}')
-            df1 = None
+        df1, err1 = load_csv(paste_data1)
+        if err1:
+            st.error(f'データ1の読み込みエラー\n\n{err1}')
     else:
         df1 = None
 
     if paste_data2:
-        try:
-            df2 = pd.read_csv(StringIO(paste_data2), dtype=str)
-        except pd.errors.ParserError as e:
-            st.error(f'データ2の読み込みエラー\n\n{parse_csv_error_detail(e)}')
-            df2 = None
+        df2, err2 = load_csv(paste_data2)
+        if err2:
+            st.error(f'データ2の読み込みエラー\n\n{err2}')
     else:
         df2 = None
 
@@ -98,31 +73,27 @@ else:
 
     # ファイルの読み込み
     if uploaded_file1:
-        try:
-            df1 = pd.read_csv(uploaded_file1, dtype=str)
-        except pd.errors.ParserError as e:
-            st.error(f'ファイル1の読み込みエラー\n\n{parse_csv_error_detail(e)}')
-            df1 = None
+        df1, err1 = load_csv(uploaded_file1)
+        if err1:
+            st.error(f'ファイル1の読み込みエラー\n\n{err1}')
     else:
         df1 = None
 
     if uploaded_file2:
-        try:
-            df2 = pd.read_csv(uploaded_file2, dtype=str)
-        except pd.errors.ParserError as e:
-            st.error(f'ファイル2の読み込みエラー\n\n{parse_csv_error_detail(e)}')
-            df2 = None
+        df2, err2 = load_csv(uploaded_file2)
+        if err2:
+            st.error(f'ファイル2の読み込みエラー\n\n{err2}')
     else:
         df2 = None
 
 if df1 is not None and df2 is not None:
- 
+
     st.divider()
-    
+
     # プレビュー件数を定義
     MAX_PREVIEW = 20
     preview = st.checkbox('データのプレビュー(最大' + str(MAX_PREVIEW) + '行)')
-    
+
     # カラム名選択
     columns1 = df1.columns.tolist()
     columns2 = df2.columns.tolist()
@@ -136,16 +107,11 @@ if df1 is not None and df2 is not None:
     if column1 and column2:
 
         # データ比較
-        unique_data1 = df1[~df1[column1].isin(df2[column2])]
-        unique_data2 = df2[~df2[column2].isin(df1[column1])]
-        merge_data1 = df1[df1[column1].isin(df2[column2])]
-        merge_data2 = df2[df2[column2].isin(df1[column1])]
-
-        # NaN値を空文字列に置き換える
-        unique_data1 = unique_data1.fillna('')
-        unique_data2 = unique_data2.fillna('')
-        merge_data1 = merge_data1.fillna('')
-        merge_data2 = merge_data2.fillna('')
+        result = compare_data(df1, df2, column1, column2)
+        unique_data1 = result['unique_data1']
+        unique_data2 = result['unique_data2']
+        merge_data1 = result['merge_data1']
+        merge_data2 = result['merge_data2']
 
         # データフレームをHTMLに変換
         def dataframe_to_html(df):
@@ -185,17 +151,13 @@ if df1 is not None and df2 is not None:
 
 
         st.divider()
-        
-        # CSVダウンロード
-        @st.cache_data
-        def convert_df_bom(df):
-            return '\ufeff'.encode('utf-8') + df.to_csv(index=False).encode('utf-8')
 
+        # CSVダウンロード
         count_unique_data1 = len(unique_data1)
         count_unique_data2 = len(unique_data2)
         count_merge_data1 = len(merge_data1)
         count_merge_data2 = len(merge_data2)
-        
+
         csv1 = convert_df_bom(unique_data1)
         csv2 = convert_df_bom(unique_data2)
         mergeCsv1 = convert_df_bom(merge_data1)
@@ -205,12 +167,12 @@ if df1 is not None and df2 is not None:
             file_name1 = f"{os.path.splitext(uploaded_file1.name)[0]}"
         else:
             file_name1 = "file1"
-            
+
         if uploaded_file2 and uploaded_file2.name:
             file_name2 = f"{os.path.splitext(uploaded_file2.name)[0]}"
         else:
             file_name2 = "file2"
-    
+
         # ダウンロードボタンを縦に並べる
         st.download_button(
             label=f"CSVファイル1のみに存在するデータをダウンロード({count_unique_data1}件)",
@@ -239,4 +201,3 @@ if df1 is not None and df2 is not None:
             file_name=f"[merge_data]Format={file_name2}_{current_time}.csv",
             mime='text/csv',
         )
-

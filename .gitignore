@@ -1,1 +1,5 @@
 knowledge_article.md
+test_data/
+__pycache__/
+.pytest_cache/
+.claude/
