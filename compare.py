@@ -37,8 +37,7 @@ st.markdown(
 st.title('CSVファイル比較ツール -AtasoPy-')
 
 # Web版（Streamlit Cloud）の場合、機密情報に関する警告を表示
-host = st.context.headers.get('Host', '')
-if 'streamlit.app' in host:
+if os.path.exists('/mount/src'):
     st.warning('このページはWeb版です。機密情報は入力しないでください。機密情報を扱う場合はローカル版をご利用ください。')
 
 uploaded_file1 = None
