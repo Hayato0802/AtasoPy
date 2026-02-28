@@ -36,8 +36,8 @@ st.markdown(
 
 st.title('CSVファイル比較ツール -AtasoPy-')
 
-# Web版（Streamlit Cloud）の場合、機密情報に関する警告を表示
-if os.path.exists('/mount/src'):
+# Web版（Streamlit Cloud=Linux）の場合、機密情報に関する警告を表示
+if os.name != 'nt':
     st.warning('このページはWeb版です。機密情報は入力しないでください。機密情報を扱う場合はローカル版をご利用ください。')
 
 uploaded_file1 = None
