@@ -54,6 +54,8 @@ if direct_input:
         df1, err1 = load_csv(paste_data1)
         if err1:
             st.error(f'データ1の読み込みエラー\n\n{err1}')
+        else:
+            col1.info(f'データ1: {len(df1)}件')
     else:
         df1 = None
 
@@ -61,6 +63,8 @@ if direct_input:
         df2, err2 = load_csv(paste_data2)
         if err2:
             st.error(f'データ2の読み込みエラー\n\n{err2}')
+        else:
+            col2.info(f'データ2: {len(df2)}件')
     else:
         df2 = None
 
@@ -76,6 +80,8 @@ else:
         df1, err1 = load_csv(uploaded_file1)
         if err1:
             st.error(f'ファイル1の読み込みエラー\n\n{err1}')
+        else:
+            col1.info(f'ファイル1: {len(df1)}件')
     else:
         df1 = None
 
@@ -83,6 +89,8 @@ else:
         df2, err2 = load_csv(uploaded_file2)
         if err2:
             st.error(f'ファイル2の読み込みエラー\n\n{err2}')
+        else:
+            col2.info(f'ファイル2: {len(df2)}件')
     else:
         df2 = None
 
